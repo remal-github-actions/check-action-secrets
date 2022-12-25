@@ -1,0 +1,12 @@
+name: Template action
+description: Template action description
+
+inputs:
+  githubToken:
+    required: true
+    default: '${{github.token}}'
+    description: GitHub access token
+
+runs:
+  using: node16
+  main: 'dist/index.js'

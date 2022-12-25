@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/eslintrc",
+  "plugins": [
+    "jest",
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:github/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2019,
+    "project": "./tsconfig.json"
+  },
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest/globals": true
+  },
+  "rules": {
+    "filenames/match-regex": "off",
+    "eslint-comments/no-use": "off",
+    "prettier/prettier": "off",
+    "semi": "off",
+    "camelcase": "off",
+    "no-unused-vars": "off",
+    "no-inner-declarations": "off",
+    "no-prototype-builtins": "off",
+    "import/no-commonjs": "off",
+    "import/no-namespace": "off",
+    "@typescript-eslint/semi": [
+      "error",
+      "never"
+    ],
+    "i18n-text/no-en": "off",
+    "github/no-then": "off",
+    "github/array-foreach": "off"
+  }
+}
