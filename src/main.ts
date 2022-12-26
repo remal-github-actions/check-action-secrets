@@ -116,7 +116,7 @@ async function run(): Promise<void> {
                                 || !!secretMatch[1]
                                 || !!secretMatch[3]
                             if (isOptional) {
-                                core.info(`Optional secret not set: ${secretName}`/*, {
+                                core.info(`Optional secret not set: ${secretName} (${workflowFilePath}:${line}:${pos})`/*, {
                                     file: workflowFilePath,
                                     startLine: line,
                                     startColumn: column,
