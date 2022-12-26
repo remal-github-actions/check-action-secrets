@@ -109,7 +109,7 @@ async function run(): Promise<void> {
                         if (!allSecrets.includes(secretName)) {
                             const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
                             core.info(`pos=${pos}`)
-                            const lines = content.substring(0, pos).split(/(\r\n|\n\r|\n|\r)/)
+                            const lines = content.substring(0, pos).split(/\\r\\n|\\n\\r|\\n|\\r/)
                             core.info(`lines=${lines}`)
                             const line = lines.length
                             core.info(`line=${line}`)
