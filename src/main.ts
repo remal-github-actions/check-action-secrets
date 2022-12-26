@@ -24,16 +24,16 @@ async function run(): Promise<void> {
             core.info('Getting organisation secrets')
             const orgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
                 org: context.repo.owner,
-            }).then(it => it.secrets.map(secret => secret.name))
-            allSecretsUnsorted.push(...orgSecrets)
+            }).then(it => it.secrets?.map(secret => secret.name))
+            if (orgSecrets != null) allSecretsUnsorted.push(...orgSecrets)
         }
 
         core.info('Getting repository secrets')
         const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
             owner: context.repo.owner,
             repo: context.repo.repo,
-        }).then(it => it.secrets.map(secret => secret.name))
-        allSecretsUnsorted.push(...repoSecrets)
+        }).then(it => it.secrets?.map(secret => secret.name))
+        if (repoSecrets != null) allSecretsUnsorted.push(...repoSecrets)
 
         const allSecrets = [...new Set(allSecretsUnsorted)].sort()
         core.info(`Accessible secrets:\n  ${allSecrets.join('\n  ')}`)
