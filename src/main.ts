@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { context } from '@actions/github'
 import { newOctokitInstance } from './internal/octokit'
-import { ContentDirectory, OrgSecret, Repo, RepoSecret } from './internal/types'
+import { DirectoryContent, FileContent, OrgSecret, Repo, RepoSecret } from './internal/types'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -69,7 +69,7 @@ async function run(): Promise<void> {
 
 
         const workflowsDir = '.github/workflows'
-        const workflowFiles: ContentDirectory = await octokit.repos.getContent({
+        const workflowFiles: DirectoryContent = await octokit.repos.getContent({
             owner: context.repo.owner,
             repo: context.repo.repo,
             path: workflowsDir,
@@ -79,9 +79,20 @@ async function run(): Promise<void> {
             return
         }
         for (const workflowFile of workflowFiles) {
+            if (workflowFile.type !== 'file') continue
             if (!workflowFile.name.endsWith('.yml')) continue
             await core.group(`Processing ${workflowFile.url}`, async () => {
-                core.info(workflowFile.content || '')
+                const workflowFileContent: FileContent = await octokit.repos.getContent({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    path: `${workflowsDir}/${workflowFile.name}`,
+                    ref,
+                }).then(it => it.data as any)
+                const content = workflowFileContent.encoding?.toLowerCase() === 'base64'
+                    ? Buffer.from(workflowFileContent.content, 'base64').toString('utf8')
+                    : workflowFileContent.content
+                core.info(content)
+                //const contentLines = content.split(/(\r\n|\n\r|\n|\r)/)
             })
         }
 
