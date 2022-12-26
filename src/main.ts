@@ -102,7 +102,7 @@ async function run(): Promise<void> {
                 const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g)
                 for (const substitutionMatch of substitutionMatches) {
                     core.info(`substitutionMatch=${JSON.stringify(substitutionMatch, null, 2)}`)
-                    const secretMatches = substitutionMatch[1].matchAll(/\bsecret\.([\w-]+)/g)
+                    const secretMatches = substitutionMatch[1].matchAll(/\bsecrets\.([\w-]+)/g)
                     for (const secretMatch of secretMatches) {
                         core.info(`secretMatch=${JSON.stringify(secretMatch, null, 2)}`)
                         const secretName = secretMatch[1]
