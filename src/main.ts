@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { context } from '@actions/github'
 import { newOctokitInstance } from './internal/octokit'
-import { ContentDirectory, OrgSecret, Repo } from './internal/types'
+import { ContentDirectory, OrgSecret, Repo, RepoSecret } from './internal/types'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -17,10 +17,12 @@ async function run(): Promise<void> {
             repo: context.repo.repo,
         }).then(it => it.data)
 
+        const isInOrg = repo.owner?.type?.toLowerCase() === 'organization'
+
 
         const allSecretsUnsorted: string[] = []
 
-        if (repo.owner?.type?.toLowerCase() === 'organization') {
+        if (isInOrg) {
             core.info('Getting organisation secrets')
             const allOrgSecrets: OrgSecret[] = await octokit.paginate(octokit.actions.listOrgSecrets, {
                 org: context.repo.owner,
@@ -44,24 +46,26 @@ async function run(): Promise<void> {
                 }
             }
             const orgSecretNames = orgSecrets.map(it => it.name)
-            core.info(`Accessible organisation secrets:\n  ${orgSecretNames.join('\n  ')}`)
-            orgSecretNames.forEach(it => allSecretsUnsorted.push(it))
+            allSecretsUnsorted.push(...orgSecretNames)
+            if (orgSecretNames) {
+                core.info(`Organisation secrets for this repository:\n  ${orgSecretNames.join('\n  ')}`)
+            } else {
+                core.info(`No organisation secrets set for this repository`)
+            }
         }
 
         core.info('Getting repository secrets')
-        const t = await octokit.paginate(octokit.actions.listRepoSecrets, {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-        })
-        core.info(JSON.stringify(t, null, 2))
         const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
             owner: context.repo.owner,
             repo: context.repo.repo,
-        }).then(it => it.secrets?.map(secret => secret.name))
-        if (repoSecrets != null) allSecretsUnsorted.push(...repoSecrets)
-
-        const allSecrets = [...new Set(allSecretsUnsorted)].sort()
-        core.info(`Accessible secrets:\n  ${allSecrets.join('\n  ')}`)
+        }).then(it => it.secrets != null ? it.secrets : it as RepoSecret[])
+        const repoSecretNames = repoSecrets.map(it => it.name)
+        allSecretsUnsorted.push(...repoSecretNames)
+        if (repoSecretNames) {
+            core.info(`Repository secrets:\n  ${repoSecretNames.join('\n  ')}`)
+        } else {
+            core.info(`No repository secrets set`)
+        }
 
 
         const workflowsDir = '.github/workflows'
@@ -71,13 +75,17 @@ async function run(): Promise<void> {
             path: workflowsDir,
             ref,
         }).then(it => it.data as any)
-        if (Array.isArray(workflowFiles)) {
-            for (const workflowFile of workflowFiles) {
-                if (workflowFile.name.endsWith('.yml')) {
-                    core.info(`Processing ${workflowFile.url}`)
-                }
-            }
+        if (!Array.isArray(workflowFiles)) {
+            return
         }
+        for (const workflowFile of workflowFiles) {
+            if (!workflowFile.name.endsWith('.yml')) continue
+            await core.group(`Processing ${workflowFile.url}`, async () => {
+                core.info(workflowFile.content || '')
+            })
+        }
+
+        throw new Error('test')
 
     } catch (error) {
         core.setFailed(error instanceof Error ? error : (error as object).toString())
