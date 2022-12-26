@@ -223,8 +223,9 @@ async function run() {
                             const column = lines[lines.length - 1].length;
                             let isOptional = optionalSecrets.includes(secretName);
                             if (!isOptional) {
-                                const nextContent = content.substring(pos + secretMatch[0].length);
-                                isOptional = nextContent.trimStart().startsWith('||');
+                                const nextContent = content.substring(pos + secretMatch[0].length).trimStart();
+                                core.info(`nextContent=${nextContent}`);
+                                isOptional = nextContent.startsWith('||');
                             }
                             if (isOptional) {
                                 core.info(`Optional secret not set: ${secretName}`);
