@@ -23,49 +23,51 @@ async function run(): Promise<void> {
         const allSecretsUnsorted: string[] = []
 
         if (isInOrg) {
-            core.info('Getting organisation secrets')
-            const allOrgSecrets: OrgSecret[] = await octokit.paginate(octokit.actions.listOrgSecrets, {
-                org: context.repo.owner,
-            }).then(it => it.secrets != null ? it.secrets : it as OrgSecret[])
-            const orgSecrets: OrgSecret[] = []
-            for (const orgSecret of allOrgSecrets) {
-                if (orgSecret.visibility == null || orgSecret.visibility.toLowerCase() === 'all') {
-                    orgSecrets.push(orgSecret)
-                } else if (orgSecret.visibility.toLowerCase() === 'private') {
-                    if (repo.visibility === 'private') {
+            await core.group('Getting organisation secrets', async () => {
+                const allOrgSecrets: OrgSecret[] = await octokit.paginate(octokit.actions.listOrgSecrets, {
+                    org: context.repo.owner,
+                }).then(it => it.secrets != null ? it.secrets : it as OrgSecret[])
+                const orgSecrets: OrgSecret[] = []
+                for (const orgSecret of allOrgSecrets) {
+                    if (orgSecret.visibility == null || orgSecret.visibility.toLowerCase() === 'all') {
                         orgSecrets.push(orgSecret)
-                    }
-                } else if (orgSecret.visibility.toLowerCase() === 'selected') {
-                    const selectedRepoNames = await octokit.actions.listSelectedReposForOrgSecret({
-                        org: context.repo.owner,
-                        secret_name: orgSecret.name,
-                    }).then(it => it.data.repositories.map(that => that.full_name))
-                    if (selectedRepoNames.includes(repo.full_name)) {
-                        orgSecrets.push(orgSecret)
+                    } else if (orgSecret.visibility.toLowerCase() === 'private') {
+                        if (repo.visibility === 'private') {
+                            orgSecrets.push(orgSecret)
+                        }
+                    } else if (orgSecret.visibility.toLowerCase() === 'selected') {
+                        const selectedRepoNames = await octokit.actions.listSelectedReposForOrgSecret({
+                            org: context.repo.owner,
+                            secret_name: orgSecret.name,
+                        }).then(it => it.data.repositories.map(that => that.full_name))
+                        if (selectedRepoNames.includes(repo.full_name)) {
+                            orgSecrets.push(orgSecret)
+                        }
                     }
                 }
-            }
-            const orgSecretNames = orgSecrets.map(it => it.name)
-            allSecretsUnsorted.push(...orgSecretNames)
-            if (orgSecretNames) {
-                core.info(`Organisation secrets for this repository:\n  ${orgSecretNames.join('\n  ')}`)
-            } else {
-                core.info(`No organisation secrets set for this repository`)
-            }
+                const orgSecretNames = orgSecrets.map(it => it.name)
+                allSecretsUnsorted.push(...orgSecretNames)
+                if (orgSecretNames.length) {
+                    core.info(`Organisation secrets for this repository:\n  ${orgSecretNames.join('\n  ')}`)
+                } else {
+                    core.info(`No organisation secrets set for this repository`)
+                }
+            })
         }
 
-        core.info('Getting repository secrets')
-        const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-        }).then(it => it.secrets != null ? it.secrets : it as RepoSecret[])
-        const repoSecretNames = repoSecrets.map(it => it.name)
-        allSecretsUnsorted.push(...repoSecretNames)
-        if (repoSecretNames) {
-            core.info(`Repository secrets:\n  ${repoSecretNames.join('\n  ')}`)
-        } else {
-            core.info(`No repository secrets set`)
-        }
+        await core.group('Getting repository secrets', async () => {
+            const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+            }).then(it => it.secrets != null ? it.secrets : it as RepoSecret[])
+            const repoSecretNames = repoSecrets.map(it => it.name)
+            allSecretsUnsorted.push(...repoSecretNames)
+            if (repoSecretNames.length) {
+                core.info(`Repository secrets:\n  ${repoSecretNames.join('\n  ')}`)
+            } else {
+                core.info(`No repository secrets set`)
+            }
+        })
 
 
         const workflowsDir = '.github/workflows'
@@ -97,8 +99,10 @@ async function run(): Promise<void> {
 
                 const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)\}\}/g)
                 for (const substitutionMatch of substitutionMatches) {
+                    core.info(`substitutionMatch: ${JSON.stringify(substitutionMatch, null, 2)}`)
                     const secretMatches = substitutionMatch[1].matchAll(/\bsecret\.([\w-]+)/g)
                     for (const secretMatch of secretMatches) {
+                        core.info(`substitutionMatch: ${JSON.stringify(secretMatch, null, 2)}`)
                         const secretName = secretMatch[1]
                         if (!allSecretsUnsorted.includes(secretName)) {
                             haveErrors = true
