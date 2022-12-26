@@ -1,11 +1,15 @@
-name: Template action
-description: Template action description
+name: Check GitHub actions secrets existence
+description: Check that all secrets used in GitHub action are defined for the repository
 
 inputs:
   githubToken:
     required: true
     default: '${{github.token}}'
     description: GitHub access token
+  ref:
+    required: false
+    default: '${{github.ref}}'
+    description: Git ref
 
 runs:
   using: node16
