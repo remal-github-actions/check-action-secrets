@@ -108,19 +108,15 @@ async function run(): Promise<void> {
                         const secretName = secretMatch[1]
                         if (!allSecrets.includes(secretName)) {
                             const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
-                            core.info(`pos=${pos}`)
                             const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/)
-                            core.info(`lines=${lines}`)
                             const line = lines.length
-                            core.info(`line=${line}`)
                             const column = lines[lines.length - 1].length
-                            core.info(`column=${column}`)
                             if (optionalSecrets.includes(secretName)) {
-                                core.warning(`Optional secret not set: ${secretName}`, {
+                                core.info(`Optional secret not set: ${secretName}`/*, {
                                     file: workflowFilePath,
                                     startLine: line,
                                     startColumn: column,
-                                })
+                                }*/)
                             } else {
                                 haveErrors = true
                                 core.error(`Unknown secret: ${secretName}`, {
@@ -138,8 +134,6 @@ async function run(): Promise<void> {
         if (haveErrors) {
             throw new Error('Workflow files with unknown secrets found')
         }
-
-        throw new Error('test')
 
     } catch (error) {
         core.setFailed(error instanceof Error ? error : (error as object).toString())
