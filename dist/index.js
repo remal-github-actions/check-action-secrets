@@ -216,11 +216,11 @@ async function run() {
                     const secretMatches = substitutionMatch[1].matchAll(/\b(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g);
                     for (const secretMatch of secretMatches) {
                         const secretName = secretMatch[2];
+                        const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0);
+                        const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/);
+                        const line = lines.length;
+                        const column = lines[lines.length - 1].length;
                         if (!allSecrets.includes(secretName)) {
-                            const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0);
-                            const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/);
-                            const line = lines.length;
-                            const column = lines[lines.length - 1].length;
                             const isOptional = optionalSecrets.includes(secretName)
                                 || !!secretMatch[1]
                                 || !!secretMatch[3];
@@ -235,6 +235,9 @@ async function run() {
                                     startColumn: column,
                                 });
                             }
+                        }
+                        else {
+                            core.info(`Known secret: ${secretName} (pos: ${line}:${column})`);
                         }
                     }
                 }
