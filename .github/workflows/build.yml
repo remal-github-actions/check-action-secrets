@@ -78,7 +78,7 @@ jobs:
     - name: Run current action
       uses: ./
       with:
-        githubToken: ${{env.PUSH_BACK_TOKEN}}
+        githubToken: ${{secrets.PUSH_BACK_TOKEN}}
 
 
     # $$$sync-with-template-modifiable-end$$$

@@ -45,9 +45,11 @@ async function run(): Promise<void> {
             path: '.github/workflows',
             ref,
         }).then(it => it.data as any)
-        for (const workflowFile of workflowFiles) {
-            if (workflowFile.name.endsWith('.yml')) {
-                core.info(`Processing ${workflowFile.name}`)
+        if (Array.isArray(workflowFiles)) {
+            for (const workflowFile of workflowFiles) {
+                if (workflowFile.name.endsWith('.yml')) {
+                    core.info(`Processing ${workflowFile.name}`)
+                }
             }
         }
 
