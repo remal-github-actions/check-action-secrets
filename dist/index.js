@@ -225,7 +225,7 @@ async function run() {
                                 || !!secretMatch[1]
                                 || !!secretMatch[3];
                             if (isOptional) {
-                                core.info(`Optional secret not set: ${secretName} (${workflowFilePath}:${line}:${pos})`);
+                                core.info(`Optional secret not set: ${secretName} (pos: ${line}:${column})`);
                             }
                             else {
                                 haveErrors = true;
