@@ -131,6 +131,10 @@ async function run() {
         const allSecretsUnsorted = [];
         if (((_b = (_a = repo.owner) === null || _a === void 0 ? void 0 : _a.type) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === 'organization') {
             core.info('Getting organisation secrets');
+            const t = await octokit.paginate(octokit.actions.listOrgSecrets, {
+                org: github_1.context.repo.owner,
+            });
+            core.info(JSON.stringify(t, null, 2));
             const orgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
                 org: github_1.context.repo.owner,
             }).then(it => { var _a; return (_a = it.secrets) === null || _a === void 0 ? void 0 : _a.map(secret => secret.name); });
