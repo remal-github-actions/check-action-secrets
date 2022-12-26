@@ -7,6 +7,10 @@ import { DirectoryContent, FileContent, OrgSecret, Repo, RepoSecret } from './in
 
 const githubToken = core.getInput('githubToken', { required: true })
 const ref = core.getInput('ref', { required: false })
+const optionalSecrets = core.getInput('optionalSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length)
 
 const octokit = newOctokitInstance(githubToken)
 
@@ -103,16 +107,26 @@ async function run(): Promise<void> {
                     for (const secretMatch of secretMatches) {
                         const secretName = secretMatch[1]
                         if (!allSecrets.includes(secretName)) {
-                            haveErrors = true
                             const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
+                            core.info(`pos=${pos}`)
                             const lines = content.substring(0, pos).split(/(\r\n|\n\r|\n|\r)/)
+                            core.info(`lines=${lines}`)
                             const line = lines.length
                             const column = lines[lines.length - 1].length
-                            core.error(`Unknown secret: ${secretName}`, {
-                                file: workflowFilePath,
-                                startLine: line,
-                                startColumn: column,
-                            })
+                            if (optionalSecrets.includes(secretName)) {
+                                core.warning(`Optional secret not set: ${secretName}`, {
+                                    file: workflowFilePath,
+                                    startLine: line,
+                                    startColumn: column,
+                                })
+                            } else {
+                                haveErrors = true
+                                core.error(`Unknown secret: ${secretName}`, {
+                                    file: workflowFilePath,
+                                    startLine: line,
+                                    startColumn: column,
+                                })
+                            }
                         }
                     }
                 }
