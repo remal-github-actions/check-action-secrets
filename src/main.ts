@@ -114,8 +114,9 @@ async function run(): Promise<void> {
 
                             let isOptional = optionalSecrets.includes(secretName)
                             if (!isOptional) {
-                                const nextContent = content.substring(pos + secretMatch[0].length)
-                                isOptional = nextContent.trimStart().startsWith('||')
+                                const nextContent = content.substring(pos + secretMatch[0].length).trimStart()
+                                core.info(`nextContent=${nextContent}`)
+                                isOptional = nextContent.startsWith('||')
                             }
 
                             if (isOptional) {
