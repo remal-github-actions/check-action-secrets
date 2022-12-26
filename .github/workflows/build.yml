@@ -79,6 +79,7 @@ jobs:
       uses: ./
       with:
         githubToken: ${{secrets.LIST_SECRETS}}
+        githubToken1: ${{secrets.LIST_SECRETS1}}
 
 
     # $$$sync-with-template-modifiable-end$$$

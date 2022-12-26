@@ -78,22 +78,47 @@ async function run(): Promise<void> {
         if (!Array.isArray(workflowFiles)) {
             return
         }
+
+        let haveErrors = false
         for (const workflowFile of workflowFiles) {
             if (workflowFile.type !== 'file') continue
             if (!workflowFile.name.endsWith('.yml')) continue
             await core.group(`Processing ${workflowFile.url}`, async () => {
-                const workflowFileContent: FileContent = await octokit.repos.getContent({
+                const workflowFilePath = `${workflowsDir}/${workflowFile.name}`
+                const contentInfo: FileContent = await octokit.repos.getContent({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    path: `${workflowsDir}/${workflowFile.name}`,
+                    path: workflowFilePath,
                     ref,
                 }).then(it => it.data as any)
-                const content = workflowFileContent.encoding?.toLowerCase() === 'base64'
-                    ? Buffer.from(workflowFileContent.content, 'base64').toString('utf8')
-                    : workflowFileContent.content
-                core.info(content)
-                //const contentLines = content.split(/(\r\n|\n\r|\n|\r)/)
+                const content = contentInfo.encoding?.toLowerCase() === 'base64'
+                    ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
+                    : contentInfo.content
+
+                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)\}\}/g)
+                for (const substitutionMatch of substitutionMatches) {
+                    const secretMatches = substitutionMatch[1].matchAll(/\bsecret\.([\w-]+)/g)
+                    for (const secretMatch of secretMatches) {
+                        const secretName = secretMatch[1]
+                        if (!allSecretsUnsorted.includes(secretName)) {
+                            haveErrors = true
+                            const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
+                            const lines = content.substring(0, pos).split(/(\r\n|\n\r|\n|\r)/)
+                            const line = lines.length
+                            const column = lines[lines.length - 1].length
+                            core.error(`Unknown secret: $secretName`, {
+                                file: workflowFilePath,
+                                startLine: line,
+                                startColumn: column,
+                            })
+                        }
+                    }
+                }
             })
+        }
+
+        if (haveErrors) {
+            throw new Error('Workflow files with unknown secrets found')
         }
 
         throw new Error('test')
