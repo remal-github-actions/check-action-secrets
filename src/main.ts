@@ -20,7 +20,7 @@ async function run(): Promise<void> {
         const isInOrg = repo.owner?.type?.toLowerCase() === 'organization'
 
 
-        const allSecretsUnsorted: string[] = []
+        const allSecrets: string[] = []
 
         if (isInOrg) {
             await core.group('Getting organisation secrets', async () => {
@@ -46,7 +46,7 @@ async function run(): Promise<void> {
                     }
                 }
                 const orgSecretNames = orgSecrets.map(it => it.name)
-                allSecretsUnsorted.push(...orgSecretNames)
+                allSecrets.push(...orgSecretNames)
                 if (orgSecretNames.length) {
                     core.info(`Organisation secrets for this repository:\n  ${orgSecretNames.join('\n  ')}`)
                 } else {
@@ -61,7 +61,7 @@ async function run(): Promise<void> {
                 repo: context.repo.repo,
             }).then(it => it.secrets != null ? it.secrets : it as RepoSecret[])
             const repoSecretNames = repoSecrets.map(it => it.name)
-            allSecretsUnsorted.push(...repoSecretNames)
+            allSecrets.push(...repoSecretNames)
             if (repoSecretNames.length) {
                 core.info(`Repository secrets:\n  ${repoSecretNames.join('\n  ')}`)
             } else {
@@ -69,7 +69,7 @@ async function run(): Promise<void> {
             }
         })
 
-        const allSecrets = [...new Set(allSecretsUnsorted)].sort()
+        core.info(`allSecrets=${allSecrets}`)
 
 
         const workflowsDir = '.github/workflows'
