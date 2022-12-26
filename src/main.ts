@@ -103,28 +103,25 @@ async function run(): Promise<void> {
 
                 const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g)
                 for (const substitutionMatch of substitutionMatches) {
-                    const secretMatches = substitutionMatch[1].matchAll(/\bsecrets\.([\w-]+)/g)
+                    const secretMatches = substitutionMatch[1].matchAll(/\b(!)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g)
                     for (const secretMatch of secretMatches) {
-                        const secretName = secretMatch[1]
+                        const secretName = secretMatch[2]
                         if (!allSecrets.includes(secretName)) {
                             const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
                             const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/)
                             const line = lines.length
                             const column = lines[lines.length - 1].length
 
-                            let isOptional = optionalSecrets.includes(secretName)
-                            if (!isOptional) {
-                                const nextContent = content.substring(pos + secretMatch[0].length).trimStart()
-                                core.info(`nextContent=${nextContent}`)
-                                isOptional = nextContent.startsWith('||')
-                            }
-
+                            const isOptional = optionalSecrets.includes(secretName)
+                                || !!secretMatch[1]
+                                || !!secretMatch[3]
                             if (isOptional) {
                                 core.info(`Optional secret not set: ${secretName}`/*, {
                                     file: workflowFilePath,
                                     startLine: line,
                                     startColumn: column,
                                 }*/)
+
                             } else {
                                 haveErrors = true
                                 core.error(`Unknown secret: ${secretName}`, {
