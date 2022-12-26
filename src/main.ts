@@ -69,8 +69,6 @@ async function run(): Promise<void> {
             }
         })
 
-        core.info(`allSecrets=${allSecrets}`)
-
 
         const workflowsDir = '.github/workflows'
         const workflowFiles: DirectoryContent = await octokit.repos.getContent({
@@ -101,19 +99,16 @@ async function run(): Promise<void> {
 
                 const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g)
                 for (const substitutionMatch of substitutionMatches) {
-                    core.info(`substitutionMatch=${JSON.stringify(substitutionMatch, null, 2)}`)
                     const secretMatches = substitutionMatch[1].matchAll(/\bsecrets\.([\w-]+)/g)
                     for (const secretMatch of secretMatches) {
-                        core.info(`secretMatch=${JSON.stringify(secretMatch, null, 2)}`)
                         const secretName = secretMatch[1]
-                        core.info(`secretName=${secretName}`)
                         if (!allSecrets.includes(secretName)) {
                             haveErrors = true
                             const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
                             const lines = content.substring(0, pos).split(/(\r\n|\n\r|\n|\r)/)
                             const line = lines.length
                             const column = lines[lines.length - 1].length
-                            core.error(`Unknown secret: $secretName`, {
+                            core.error(`Unknown secret: ${secretName}`, {
                                 file: workflowFilePath,
                                 startLine: line,
                                 startColumn: column,
