@@ -120,6 +120,10 @@ const github_1 = __nccwpck_require__(5438);
 const octokit_1 = __nccwpck_require__(8093);
 const githubToken = core.getInput('githubToken', { required: true });
 const ref = core.getInput('ref', { required: false });
+const optionalSecrets = core.getInput('optionalSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length);
 const octokit = (0, octokit_1.newOctokitInstance)(githubToken);
 async function run() {
     var _a, _b;
@@ -128,50 +132,57 @@ async function run() {
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
         }).then(it => it.data);
-        const allSecretsUnsorted = [];
-        if (((_b = (_a = repo.owner) === null || _a === void 0 ? void 0 : _a.type) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === 'organization') {
-            core.info('Getting organisation secrets');
-            const allOrgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
-                org: github_1.context.repo.owner,
-            }).then(it => it.secrets != null ? it.secrets : it);
-            const orgSecrets = [];
-            for (const orgSecret of allOrgSecrets) {
-                if (orgSecret.visibility == null || orgSecret.visibility.toLowerCase() === 'all') {
-                    orgSecrets.push(orgSecret);
-                }
-                else if (orgSecret.visibility.toLowerCase() === 'private') {
-                    if (repo.visibility === 'private') {
+        const isInOrg = ((_b = (_a = repo.owner) === null || _a === void 0 ? void 0 : _a.type) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === 'organization';
+        const allSecrets = [];
+        if (isInOrg) {
+            await core.group('Getting organisation secrets', async () => {
+                const allOrgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
+                    org: github_1.context.repo.owner,
+                }).then(it => it.secrets != null ? it.secrets : it);
+                const orgSecrets = [];
+                for (const orgSecret of allOrgSecrets) {
+                    if (orgSecret.visibility == null || orgSecret.visibility.toLowerCase() === 'all') {
                         orgSecrets.push(orgSecret);
                     }
-                }
-                else if (orgSecret.visibility.toLowerCase() === 'selected') {
-                    const selectedRepoNames = await octokit.actions.listSelectedReposForOrgSecret({
-                        org: github_1.context.repo.owner,
-                        secret_name: orgSecret.name,
-                    }).then(it => it.data.repositories.map(that => that.full_name));
-                    if (selectedRepoNames.includes(repo.full_name)) {
-                        orgSecrets.push(orgSecret);
+                    else if (orgSecret.visibility.toLowerCase() === 'private') {
+                        if (repo.visibility === 'private') {
+                            orgSecrets.push(orgSecret);
+                        }
+                    }
+                    else if (orgSecret.visibility.toLowerCase() === 'selected') {
+                        const selectedRepoNames = await octokit.actions.listSelectedReposForOrgSecret({
+                            org: github_1.context.repo.owner,
+                            secret_name: orgSecret.name,
+                        }).then(it => it.data.repositories.map(that => that.full_name));
+                        if (selectedRepoNames.includes(repo.full_name)) {
+                            orgSecrets.push(orgSecret);
+                        }
                     }
                 }
-            }
-            const orgSecretNames = orgSecrets.map(it => it.name);
-            core.info(`Accessible organisation secrets:\n  ${orgSecretNames.join('\n  ')}`);
-            orgSecretNames.forEach(it => allSecretsUnsorted.push(it));
+                const orgSecretNames = orgSecrets.map(it => it.name);
+                allSecrets.push(...orgSecretNames);
+                if (orgSecretNames.length) {
+                    core.info(`Organisation secrets for this repository:\n  ${orgSecretNames.join('\n  ')}`);
+                }
+                else {
+                    core.info(`No organisation secrets set for this repository`);
+                }
+            });
         }
-        core.info('Getting repository secrets');
-        const t = await octokit.paginate(octokit.actions.listRepoSecrets, {
-            owner: github_1.context.repo.owner,
-            repo: github_1.context.repo.repo,
+        await core.group('Getting repository secrets', async () => {
+            const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
+                owner: github_1.context.repo.owner,
+                repo: github_1.context.repo.repo,
+            }).then(it => it.secrets != null ? it.secrets : it);
+            const repoSecretNames = repoSecrets.map(it => it.name);
+            allSecrets.push(...repoSecretNames);
+            if (repoSecretNames.length) {
+                core.info(`Repository secrets:\n  ${repoSecretNames.join('\n  ')}`);
+            }
+            else {
+                core.info(`No repository secrets set`);
+            }
         });
-        core.info(JSON.stringify(t, null, 2));
-        const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
-            owner: github_1.context.repo.owner,
-            repo: github_1.context.repo.repo,
-        }).then(it => { var _a; return (_a = it.secrets) === null || _a === void 0 ? void 0 : _a.map(secret => secret.name); });
-        if (repoSecrets != null)
-            allSecretsUnsorted.push(...repoSecrets);
-        const allSecrets = [...new Set(allSecretsUnsorted)].sort();
-        core.info(`Accessible secrets:\n  ${allSecrets.join('\n  ')}`);
         const workflowsDir = '.github/workflows';
         const workflowFiles = await octokit.repos.getContent({
             owner: github_1.context.repo.owner,
@@ -179,12 +190,55 @@ async function run() {
             path: workflowsDir,
             ref,
         }).then(it => it.data);
-        if (Array.isArray(workflowFiles)) {
-            for (const workflowFile of workflowFiles) {
-                if (workflowFile.name.endsWith('.yml')) {
-                    core.info(`Processing ${workflowFile.url}`);
+        if (!Array.isArray(workflowFiles)) {
+            return;
+        }
+        let haveErrors = false;
+        for (const workflowFile of workflowFiles) {
+            if (workflowFile.type !== 'file')
+                continue;
+            if (!workflowFile.name.endsWith('.yml'))
+                continue;
+            await core.group(`Processing ${workflowFile.url}`, async () => {
+                var _a;
+                const workflowFilePath = `${workflowsDir}/${workflowFile.name}`;
+                const contentInfo = await octokit.repos.getContent({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    path: workflowFilePath,
+                    ref,
+                }).then(it => it.data);
+                const content = ((_a = contentInfo.encoding) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === 'base64'
+                    ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
+                    : contentInfo.content;
+                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g);
+                for (const substitutionMatch of substitutionMatches) {
+                    const secretMatches = substitutionMatch[1].matchAll(/\bsecrets\.([\w-]+)/g);
+                    for (const secretMatch of secretMatches) {
+                        const secretName = secretMatch[1];
+                        if (!allSecrets.includes(secretName)) {
+                            const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0);
+                            const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/);
+                            const line = lines.length;
+                            const column = lines[lines.length - 1].length;
+                            if (optionalSecrets.includes(secretName)) {
+                                core.info(`Optional secret not set: ${secretName}`);
+                            }
+                            else {
+                                haveErrors = true;
+                                core.error(`Unknown secret: ${secretName}`, {
+                                    file: workflowFilePath,
+                                    startLine: line,
+                                    startColumn: column,
+                                });
+                            }
+                        }
+                    }
                 }
-            }
+            });
+        }
+        if (haveErrors) {
+            throw new Error('Workflow files with unknown secrets found');
         }
     }
     catch (error) {
