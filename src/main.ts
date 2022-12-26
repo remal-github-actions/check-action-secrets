@@ -106,12 +106,12 @@ async function run(): Promise<void> {
                     const secretMatches = substitutionMatch[1].matchAll(/\b(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g)
                     for (const secretMatch of secretMatches) {
                         const secretName = secretMatch[2]
-                        if (!allSecrets.includes(secretName)) {
-                            const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
-                            const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/)
-                            const line = lines.length
-                            const column = lines[lines.length - 1].length
+                        const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
+                        const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/)
+                        const line = lines.length
+                        const column = lines[lines.length - 1].length
 
+                        if (!allSecrets.includes(secretName)) {
                             const isOptional = optionalSecrets.includes(secretName)
                                 || !!secretMatch[1]
                                 || !!secretMatch[3]
@@ -130,6 +130,13 @@ async function run(): Promise<void> {
                                     startColumn: column,
                                 })
                             }
+
+                        } else {
+                            core.info(`Known secret: ${secretName} (pos: ${line}:${column})`/*, {
+                                file: workflowFilePath,
+                                startLine: line,
+                                startColumn: column,
+                            }*/)
                         }
                     }
                 }
