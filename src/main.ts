@@ -22,6 +22,10 @@ async function run(): Promise<void> {
 
         if (repo.owner?.type?.toLowerCase() === 'organization') {
             core.info('Getting organisation secrets')
+            const t = await octokit.paginate(octokit.actions.listOrgSecrets, {
+                org: context.repo.owner,
+            })
+            core.info(JSON.stringify(t, null, 2))
             const orgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
                 org: context.repo.owner,
             }).then(it => it.secrets?.map(secret => secret.name))
