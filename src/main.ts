@@ -69,6 +69,8 @@ async function run(): Promise<void> {
             }
         })
 
+        const allSecrets = [...new Set(allSecretsUnsorted)].sort()
+
 
         const workflowsDir = '.github/workflows'
         const workflowFiles: DirectoryContent = await octokit.repos.getContent({
@@ -97,14 +99,15 @@ async function run(): Promise<void> {
                     ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
                     : contentInfo.content
 
-                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)\}\}/g)
+                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g)
                 for (const substitutionMatch of substitutionMatches) {
-                    core.info(`substitutionMatch: ${JSON.stringify(substitutionMatch, null, 2)}`)
+                    core.info(`substitutionMatch=${JSON.stringify(substitutionMatch, null, 2)}`)
                     const secretMatches = substitutionMatch[1].matchAll(/\bsecret\.([\w-]+)/g)
                     for (const secretMatch of secretMatches) {
-                        core.info(`substitutionMatch: ${JSON.stringify(secretMatch, null, 2)}`)
+                        core.info(`secretMatch=${JSON.stringify(secretMatch, null, 2)}`)
                         const secretName = secretMatch[1]
-                        if (!allSecretsUnsorted.includes(secretName)) {
+                        core.info(`secretName=${secretName}`)
+                        if (!allSecrets.includes(secretName)) {
                             haveErrors = true
                             const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
                             const lines = content.substring(0, pos).split(/(\r\n|\n\r|\n|\r)/)
