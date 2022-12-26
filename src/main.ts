@@ -116,7 +116,7 @@ async function run(): Promise<void> {
                                 || !!secretMatch[1]
                                 || !!secretMatch[3]
                             if (isOptional) {
-                                core.info(`Optional secret not set: ${secretName} (pos: ${line}:${column})`/*, {
+                                core.info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`/*, {
                                     file: workflowFilePath,
                                     startLine: line,
                                     startColumn: column,
@@ -124,7 +124,7 @@ async function run(): Promise<void> {
 
                             } else {
                                 haveErrors = true
-                                core.error(`Unknown secret: ${secretName}`, {
+                                core.error(`Not configured secret: ${secretName}`, {
                                     file: workflowFilePath,
                                     startLine: line,
                                     startColumn: column,
@@ -132,7 +132,7 @@ async function run(): Promise<void> {
                             }
 
                         } else {
-                            core.info(`Known secret: ${secretName} (pos: ${line}:${column})`/*, {
+                            core.info(`Configured secret: ${secretName} (pos: ${line}:${column})`/*, {
                                 file: workflowFilePath,
                                 startLine: line,
                                 startColumn: column,

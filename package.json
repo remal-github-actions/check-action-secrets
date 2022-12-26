@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "action-secrets-checker",
+  "name": "check-action-secrets",
   "version": "1.0.0",
   "engines": {
     "node": ">=16"
