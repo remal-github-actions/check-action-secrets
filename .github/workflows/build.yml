@@ -79,6 +79,9 @@ jobs:
       uses: ./
       with:
         githubToken: ${{secrets.LIST_SECRETS}}
+        optionalSecrets: |
+          TEMPLATE_REPOSITORY
+          SYNC_WITH_TEMPLATE_ADDITIONAL_PATCH
         githubToken1: ${{secrets.LIST_SECRETS1}}
 
 

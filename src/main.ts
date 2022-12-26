@@ -112,7 +112,9 @@ async function run(): Promise<void> {
                             const lines = content.substring(0, pos).split(/(\r\n|\n\r|\n|\r)/)
                             core.info(`lines=${lines}`)
                             const line = lines.length
+                            core.info(`line=${line}`)
                             const column = lines[lines.length - 1].length
+                            core.info(`column=${column}`)
                             if (optionalSecrets.includes(secretName)) {
                                 core.warning(`Optional secret not set: ${secretName}`, {
                                     file: workflowFilePath,
