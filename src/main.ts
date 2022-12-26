@@ -103,7 +103,7 @@ async function run(): Promise<void> {
 
                 const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g)
                 for (const substitutionMatch of substitutionMatches) {
-                    const secretMatches = substitutionMatch[1].matchAll(/\b(!)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g)
+                    const secretMatches = substitutionMatch[1].matchAll(/\b(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g)
                     for (const secretMatch of secretMatches) {
                         const secretName = secretMatch[2]
                         if (!allSecrets.includes(secretName)) {
