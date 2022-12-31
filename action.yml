@@ -13,6 +13,9 @@ inputs:
   optionalSecrets:
     required: false
     description: A list of optional secrets
+  forbiddenSecrets:
+    required: false
+    description: A list of forbidden secrets
 
 runs:
   using: node16
