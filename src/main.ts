@@ -89,7 +89,7 @@ async function run(): Promise<void> {
             return
         }
 
-        let haveErrors = false
+        let haveUnknownSecrets = false
         for (const workflowFile of workflowFiles) {
             if (workflowFile.type !== 'file') continue
             if (!workflowFile.name.endsWith('.yml')) continue
@@ -127,7 +127,7 @@ async function run(): Promise<void> {
                                 }*/)
 
                             } else {
-                                haveErrors = true
+                                haveUnknownSecrets = true
                                 core.error(`Not configured secret: ${secretName}`, {
                                     file: workflowFilePath,
                                     startLine: line,
@@ -147,14 +147,14 @@ async function run(): Promise<void> {
             })
         }
         
-        if (haveErrors) {
+        if (haveUnknownSecrets) {
             throw new Error('Workflow files with unknown secrets found')
         }
 
         let haveForbiddenSecrets = false
         for (const forbiddenSecret of forbiddenSecrets) {
             if (allSecrets.includes(secretName)) {
-                core.error(`Forbidden secret: ${secretName}`)
+                core.error(`Forbidden secret: ${forbiddenSecret}`)
                 haveForbiddenSecrets = true
             }
         }
