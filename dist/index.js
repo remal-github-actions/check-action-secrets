@@ -124,6 +124,10 @@ const optionalSecrets = core.getInput('optionalSecrets', { required: false })
     .split(/[,;\n\r]/)
     .map(it => it.trim())
     .filter(it => it.length);
+const forbiddenSecrets = core.getInput('forbiddenSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length);
 const octokit = (0, octokit_1.newOctokitInstance)(githubToken);
 async function run() {
     var _a, _b;
@@ -193,7 +197,7 @@ async function run() {
         if (!Array.isArray(workflowFiles)) {
             return;
         }
-        let haveErrors = false;
+        let haveUnknownSecrets = false;
         for (const workflowFile of workflowFiles) {
             if (workflowFile.type !== 'file')
                 continue;
@@ -228,7 +232,7 @@ async function run() {
                                 core.info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`);
                             }
                             else {
-                                haveErrors = true;
+                                haveUnknownSecrets = true;
                                 core.error(`Not configured secret: ${secretName}`, {
                                     file: workflowFilePath,
                                     startLine: line,
@@ -243,8 +247,18 @@ async function run() {
                 }
             });
         }
-        if (haveErrors) {
+        if (haveUnknownSecrets) {
             throw new Error('Workflow files with unknown secrets found');
+        }
+        let haveForbiddenSecrets = false;
+        for (const forbiddenSecret of forbiddenSecrets) {
+            if (allSecrets.includes(forbiddenSecret)) {
+                core.error(`Forbidden secret: ${forbiddenSecret}`);
+                haveForbiddenSecrets = true;
+            }
+        }
+        if (haveForbiddenSecrets) {
+            throw new Error('Repository (or organisation) has forbidden secrets defined');
         }
     }
     catch (error) {
