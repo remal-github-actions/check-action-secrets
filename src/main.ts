@@ -153,7 +153,7 @@ async function run(): Promise<void> {
 
         let haveForbiddenSecrets = false
         for (const forbiddenSecret of forbiddenSecrets) {
-            if (allSecrets.includes(secretName)) {
+            if (allSecrets.includes(forbiddenSecret)) {
                 core.error(`Forbidden secret: ${forbiddenSecret}`)
                 haveForbiddenSecrets = true
             }
