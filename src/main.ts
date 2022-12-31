@@ -11,6 +11,10 @@ const optionalSecrets = core.getInput('optionalSecrets', { required: false })
     .split(/[,;\n\r]/)
     .map(it => it.trim())
     .filter(it => it.length)
+const forbiddenSecrets = core.getInput('forbiddenSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length)
 
 const octokit = newOctokitInstance(githubToken)
 
@@ -142,9 +146,20 @@ async function run(): Promise<void> {
                 }
             })
         }
-
+        
         if (haveErrors) {
             throw new Error('Workflow files with unknown secrets found')
+        }
+
+        let haveForbiddenSecrets = false
+        for (const forbiddenSecret : forbiddenSecrets) {
+            if (allSecrets.includes(secretName)) {
+                core.error(`Forbidden secret: ${secretName}`)
+                haveForbiddenSecrets = true
+            }
+        }
+        if (haveForbiddenSecrets) {
+            throw new Error('Repository (or organisation) has forbidden secrets defined')
         }
 
     } catch (error) {
