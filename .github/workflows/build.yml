@@ -84,7 +84,6 @@ jobs:
 
     # $$$sync-with-template-modifiable: validation $$$
 
-
     - name: Run current action
       uses: ./
       with:
@@ -92,7 +91,6 @@ jobs:
         optionalSecrets: |
           TEMPLATE_REPOSITORY
           SYNC_WITH_TEMPLATE_ADDITIONAL_PATCH
-
 
     # $$$sync-with-template-modifiable-end$$$
 
