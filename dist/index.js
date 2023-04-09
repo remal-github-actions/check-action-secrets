@@ -130,13 +130,12 @@ const forbiddenSecrets = core.getInput('forbiddenSecrets', { required: false })
     .filter(it => it.length);
 const octokit = (0, octokit_1.newOctokitInstance)(githubToken);
 async function run() {
-    var _a, _b;
     try {
         const repo = await octokit.repos.get({
             owner: github_1.context.repo.owner,
             repo: github_1.context.repo.repo,
         }).then(it => it.data);
-        const isInOrg = ((_b = (_a = repo.owner) === null || _a === void 0 ? void 0 : _a.type) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === 'organization';
+        const isInOrg = repo.owner?.type?.toLowerCase() === 'organization';
         const allSecrets = [];
         if (isInOrg) {
             await core.group('Getting organisation secrets', async () => {
@@ -204,7 +203,6 @@ async function run() {
             if (!workflowFile.name.endsWith('.yml'))
                 continue;
             await core.group(`Processing ${workflowFile.url}`, async () => {
-                var _a;
                 const workflowFilePath = `${workflowsDir}/${workflowFile.name}`;
                 const contentInfo = await octokit.repos.getContent({
                     owner: github_1.context.repo.owner,
@@ -212,7 +210,7 @@ async function run() {
                     path: workflowFilePath,
                     ref,
                 }).then(it => it.data);
-                const content = ((_a = contentInfo.encoding) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === 'base64'
+                const content = contentInfo.encoding?.toLowerCase() === 'base64'
                     ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
                     : contentInfo.content;
                 const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g);
