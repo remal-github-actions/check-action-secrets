@@ -4470,7 +4470,7 @@ async function requestWithGraphqlErrorHandling(state, octokit, request, options)
 }
 
 // pkg/dist-src/index.js
-var VERSION = "4.1.5";
+var VERSION = "4.1.6";
 function retry(octokit, octokitOptions) {
   const state = Object.assign(
     {
