@@ -747,10 +747,10 @@
   dependencies:
     "@octokit/types" "^6.40.0"
 
-"@octokit/plugin-request-log@1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@octokit/plugin-request-log/-/plugin-request-log-1.0.4.tgz#5e50ed7083a613816b1e4a28aeec5fb7f1462e85"
-  integrity sha512-mLUsMkgP7K/cnFEw07kWqXGF5LKrOkD+lhCrKvPHXWDywAwuDUeDwWBpc69XK3pNX0uKiVt8g5z96PJ6z9xCFA==
+"@octokit/plugin-request-log@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@octokit/plugin-request-log/-/plugin-request-log-2.0.1.tgz#1b5b66e3b01733a431eb32a9fab03ceaccbfccd4"
+  integrity sha512-CpLitRgvXn09pEyEd4A25oxLqIqltBfbHnEiHjcwT3+LPCG2qEz/pD88IzQd/9B0ZHlKeOApTs1tgOjmwsYamw==
 
 "@octokit/plugin-rest-endpoint-methods@^5.13.0":
   version "5.16.2"
