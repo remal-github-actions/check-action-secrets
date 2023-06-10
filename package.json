@@ -25,6 +25,8 @@
   },
   "devDependencies": {
     "@tsconfig/node16": "1.0.4",
+    "@types/semver": "^7",
+    "semver": "^7",
     "@types/jest": "29.5.2",
     "@types/node": "16.18.35",
     "@types/rimraf": "3.0.2",
