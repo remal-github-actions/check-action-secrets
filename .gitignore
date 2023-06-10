@@ -62,5 +62,12 @@ node_modules/
 .DS_Store
 
 # Remal GitHub actions:
+/.pnp.*
+/.yarn/*
+!/.yarn/patches/
+!/.yarn/plugins/
+!/.yarn/releases/
+!/.yarn/sdks/
+!/.yarn/versions/
 /build
 /coverage
