@@ -1392,20 +1392,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:5.59.9":
-  version: 5.59.9
-  resolution: "@typescript-eslint/parser@npm:5.59.9"
+"@typescript-eslint/parser@npm:5.59.10":
+  version: 5.59.10
+  resolution: "@typescript-eslint/parser@npm:5.59.10"
   dependencies:
-    "@typescript-eslint/scope-manager": 5.59.9
-    "@typescript-eslint/types": 5.59.9
-    "@typescript-eslint/typescript-estree": 5.59.9
+    "@typescript-eslint/scope-manager": 5.59.10
+    "@typescript-eslint/types": 5.59.10
+    "@typescript-eslint/typescript-estree": 5.59.10
     debug: ^4.3.4
   peerDependencies:
     eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 69b07d0a5bc6e1d24d23916c057ea9f2f53a0e7fb6dabadff92987c299640edee2c013fb93269322c7124e87b5c515529001397eae33006dfb40e1dcdf1902d7
+  checksum: 09abcaa6bcb8b4d63d3f700fbe8d79b6895a232d47445878f57495032aa201fb7aaf1db0ded4682fe4292c9ef67b52f7a41ac24abbb57c091d08977c6637420a
   languageName: node
   linkType: hard
 
@@ -1433,6 +1433,16 @@ __metadata:
     "@typescript-eslint/types": 5.36.2
     "@typescript-eslint/visitor-keys": 5.36.2
   checksum: 93ff655f7c237c88ec6dc5911202dd8f81bd8909b27f1a758a9d77e9791040f1ee6fe2891314bde75c808ce586246e98003a1b1396937b0312f2440016dea751
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/scope-manager@npm:5.59.10":
+  version: 5.59.10
+  resolution: "@typescript-eslint/scope-manager@npm:5.59.10"
+  dependencies:
+    "@typescript-eslint/types": 5.59.10
+    "@typescript-eslint/visitor-keys": 5.59.10
+  checksum: 2982ecb36ee07904d0ef9c2a816cd6075a26c99fd17e83250560728695d7aa933d3e21c2916209432c20d77e844c7e1375694b2a05ca8bf377177cca1607a900
   languageName: node
   linkType: hard
 
@@ -1487,6 +1497,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/types@npm:5.59.10":
+  version: 5.59.10
+  resolution: "@typescript-eslint/types@npm:5.59.10"
+  checksum: 7f4733297de95ffd4e218806a930bbfc8c58f3e282ab2acca899af000a69fe0d64facc3c72a9bd1ab68a4261c1061804df90860a60093da59b660ecb69a455b3
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/types@npm:5.59.9":
   version: 5.59.9
   resolution: "@typescript-eslint/types@npm:5.59.9"
@@ -1509,6 +1526,24 @@ __metadata:
     typescript:
       optional: true
   checksum: 2827ff57a114b6107ea6d555f3855007133b08a7c2bafba0cfa0c935d8b99fd7b49e982d48cccc1c5ba550d95748d0239f5e2109893f12a165d76ed64a0d261b
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/typescript-estree@npm:5.59.10":
+  version: 5.59.10
+  resolution: "@typescript-eslint/typescript-estree@npm:5.59.10"
+  dependencies:
+    "@typescript-eslint/types": 5.59.10
+    "@typescript-eslint/visitor-keys": 5.59.10
+    debug: ^4.3.4
+    globby: ^11.1.0
+    is-glob: ^4.0.3
+    semver: ^7.3.7
+    tsutils: ^3.21.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 2989987834af3ccda75c333ed21ea9fb9eaae02c888cc1e0a507184a9e8cf84cf90a6fb35e9e72436cc4ca58a4e19c887603ebd7669a7a09d20f0be14164d2c3
   languageName: node
   linkType: hard
 
@@ -1571,6 +1606,16 @@ __metadata:
     "@typescript-eslint/types": 5.36.2
     eslint-visitor-keys: ^3.3.0
   checksum: 87ccdcfa5cdedaa3a1aac30d656969f4f5910b62bcaacdf80a514dbf0cbbd8e79b55f8e987eab34cc79ece8ce4b8c19d5caf8b0afb74e0b0d7ab39fb29aa8eba
+  languageName: node
+  linkType: hard
+
+"@typescript-eslint/visitor-keys@npm:5.59.10":
+  version: 5.59.10
+  resolution: "@typescript-eslint/visitor-keys@npm:5.59.10"
+  dependencies:
+    "@typescript-eslint/types": 5.59.10
+    eslint-visitor-keys: ^3.3.0
+  checksum: 3c59ac2c2b800263b49ce3fb22afabfb2cf0d437637233f805c918bc7ceb5d9a9eecd0dfbfb5c8b9c3864e705f5ff1bba688556a8349b7de5df6fdee62dbf185
   languageName: node
   linkType: hard
 
@@ -2127,7 +2172,7 @@ __metadata:
     "@types/rimraf": 3.0.2
     "@types/semver": ^7
     "@typescript-eslint/eslint-plugin": 5.59.9
-    "@typescript-eslint/parser": 5.59.9
+    "@typescript-eslint/parser": 5.59.10
     "@vercel/ncc": 0.36.1
     console-log-level: 1.4.1
     eslint: 8.42.0
