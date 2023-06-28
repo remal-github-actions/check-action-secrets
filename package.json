@@ -24,7 +24,7 @@
     "console-log-level": "1.4.1"
   },
   "devDependencies": {
-    "@tsconfig/node16": "1.0.4",
+    "@tsconfig/node16": "16.1.0",
     "@types/jest": "29.5.2",
     "@types/node": "16.18.37",
     "@types/rimraf": "3.0.2",
