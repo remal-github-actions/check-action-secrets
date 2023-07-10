@@ -19,8 +19,8 @@
     "@actions/core": "1.10.0",
     "@actions/github": "5.1.1",
     "@octokit/plugin-request-log": "2.0.1",
-    "@octokit/plugin-retry": "4.1.6",
-    "@octokit/plugin-throttling": "5.2.3",
+    "@octokit/plugin-retry": "6.0.0",
+    "@octokit/plugin-throttling": "6.1.0",
     "console-log-level": "1.4.1"
   },
   "devDependencies": {
