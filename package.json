@@ -24,7 +24,7 @@
     "console-log-level": "1.4.1"
   },
   "devDependencies": {
-    "@tsconfig/node16": "16.1.0",
+    "@tsconfig/node16": "16.1.1",
     "@types/jest": "29.5.3",
     "@types/node": "16.18.41",
     "@types/semver": "^7",
