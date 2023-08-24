@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=16"
   },
-  "packageManager": "yarn@3.6.2",
+  "packageManager": "yarn@3.6.3",
   "main": "dist/main.js",
   "scripts": {
     "lint": "eslint --fix",
