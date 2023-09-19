@@ -1062,12 +1062,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/plugin-request-log@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@octokit/plugin-request-log@npm:3.0.0"
+"@octokit/plugin-request-log@npm:4.0.0":
+  version: 4.0.0
+  resolution: "@octokit/plugin-request-log@npm:4.0.0"
   peerDependencies:
-    "@octokit/core": ">=3"
-  checksum: ab0bbe536f899ed34f17e69c2b411a9f5054fe6f3e020d704cccfc8d95d166ed5dc22b23a3d4db2ab014a37d28e463a516de3fcc1b802531809c22fa3d186776
+    "@octokit/core": ">=5"
+  checksum: 2a8a6619640942092009a9248ceeb163ce01c978e2d7b2a7eb8686bd09a04b783c4cd9071eebb16652d233587abcde449a02ce4feabc652f0a171615fb3e9946
   languageName: node
   linkType: hard
 
@@ -2262,7 +2262,7 @@ __metadata:
   dependencies:
     "@actions/core": 1.10.1
     "@actions/github": 5.1.1
-    "@octokit/plugin-request-log": 3.0.0
+    "@octokit/plugin-request-log": 4.0.0
     "@octokit/plugin-retry": 5.0.5
     "@octokit/plugin-throttling": 5.2.3
     "@tsconfig/node20": 1.0.2
