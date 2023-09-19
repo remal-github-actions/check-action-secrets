@@ -18,5 +18,5 @@ inputs:
     description: A list of forbidden secrets
 
 runs:
-  using: node16
+  using: node20
   main: 'dist/index.js'
