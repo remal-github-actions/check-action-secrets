@@ -4668,9 +4668,10 @@ __export(dist_src_exports, {
 });
 module.exports = __toCommonJS(dist_src_exports);
 var import_light = __toESM(__nccwpck_require__(1174));
+var import_core = __nccwpck_require__(6762);
 
 // pkg/dist-src/version.js
-var VERSION = "6.1.0";
+var VERSION = "7.0.0";
 
 // pkg/dist-src/wrap-request.js
 var noop = () => Promise.resolve();
