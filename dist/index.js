@@ -7863,7 +7863,7 @@ var import_light = __toESM(__nccwpck_require__(1174));
 var import_core = __nccwpck_require__(6762);
 
 // pkg/dist-src/version.js
-var VERSION = "8.1.2";
+var VERSION = "8.1.3";
 
 // pkg/dist-src/wrap-request.js
 var noop = () => Promise.resolve();
@@ -7889,11 +7889,14 @@ async function doRequest(state, request, options) {
   if (isSearch) {
     await state.search.key(state.id).schedule(jobOptions, noop);
   }
-  const req = state.global.key(state.id).schedule(jobOptions, request, options);
+  const req = state.global.key(state.id).schedule(
+    jobOptions,
+    request,
+    options
+  );
   if (isGraphQL) {
     const res = await req;
-    if (res.data.errors != null && // @ts-expect-error
-    res.data.errors.some((error) => error.type === "RATE_LIMITED")) {
+    if (res.data.errors != null && res.data.errors.some((error) => error.type === "RATE_LIMITED")) {
       const error = Object.assign(new Error("GraphQL Rate Limit Exceeded"), {
         response: res,
         data: res.data
