@@ -1,278 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 8093:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.newOctokitInstance = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const utils_1 = __nccwpck_require__(3030);
-const plugin_request_log_1 = __nccwpck_require__(8883);
-const plugin_retry_1 = __nccwpck_require__(6298);
-const plugin_throttling_1 = __nccwpck_require__(9968);
-const OctokitWithPlugins = utils_1.GitHub
-    .plugin(plugin_retry_1.retry)
-    .plugin(plugin_throttling_1.throttling)
-    .plugin(plugin_request_log_1.requestLog)
-    .defaults({
-    previews: [
-        'baptiste',
-        'mercy',
-    ],
-});
-function newOctokitInstance(token) {
-    const baseOptions = (0, utils_1.getOctokitOptions)(token);
-    const throttleOptions = {
-        throttle: {
-            onRateLimit: (retryAfter, options) => {
-                const retryCount = options.request.retryCount;
-                const retryLogInfo = retryCount === 0 ? '' : ` (retry #${retryCount})`;
-                core.debug(`Request quota exhausted for request ${options.method} ${options.url}${retryLogInfo}`);
-                return retryCount <= 4;
-            },
-            onSecondaryRateLimit: (retryAfter, options) => {
-                core.error(`Abuse detected for request ${options.method} ${options.url}`);
-                return false;
-            },
-        },
-    };
-    const retryOptions = {
-        retry: {
-            doNotRetry: ['429'],
-        },
-    };
-    const logOptions = {};
-    const traceLogging = __nccwpck_require__(385)({ level: 'trace' });
-    if (core.isDebug()) {
-        logOptions.log = traceLogging;
-    }
-    const allOptions = {
-        ...baseOptions,
-        ...throttleOptions,
-        ...retryOptions,
-        ...logOptions,
-    };
-    const octokit = new OctokitWithPlugins(allOptions);
-    const client = {
-        ...octokit.rest,
-        paginate: octokit.paginate,
-    };
-    return client;
-}
-exports.newOctokitInstance = newOctokitInstance;
-
-
-/***/ }),
-
-/***/ 9538:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __nccwpck_require__(5438);
-const octokit_1 = __nccwpck_require__(8093);
-const githubToken = core.getInput('githubToken', { required: true });
-const ref = core.getInput('ref', { required: false });
-const optionalSecrets = core.getInput('optionalSecrets', { required: false })
-    .split(/[,;\n\r]/)
-    .map(it => it.trim())
-    .filter(it => it.length);
-const forbiddenSecrets = core.getInput('forbiddenSecrets', { required: false })
-    .split(/[,;\n\r]/)
-    .map(it => it.trim())
-    .filter(it => it.length);
-const octokit = (0, octokit_1.newOctokitInstance)(githubToken);
-async function run() {
-    try {
-        const repo = await octokit.repos.get({
-            owner: github_1.context.repo.owner,
-            repo: github_1.context.repo.repo,
-        }).then(it => it.data);
-        const isInOrg = repo.owner?.type?.toLowerCase() === 'organization';
-        const allSecrets = [];
-        if (isInOrg) {
-            await core.group('Getting organisation secrets', async () => {
-                const allOrgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
-                    org: github_1.context.repo.owner,
-                }).then(it => it.secrets != null ? it.secrets : it);
-                const orgSecrets = [];
-                for (const orgSecret of allOrgSecrets) {
-                    if (orgSecret.visibility == null || orgSecret.visibility.toLowerCase() === 'all') {
-                        orgSecrets.push(orgSecret);
-                    }
-                    else if (orgSecret.visibility.toLowerCase() === 'private') {
-                        if (repo.visibility === 'private') {
-                            orgSecrets.push(orgSecret);
-                        }
-                    }
-                    else if (orgSecret.visibility.toLowerCase() === 'selected') {
-                        const selectedRepoNames = await octokit.actions.listSelectedReposForOrgSecret({
-                            org: github_1.context.repo.owner,
-                            secret_name: orgSecret.name,
-                        }).then(it => it.data.repositories.map(that => that.full_name));
-                        if (selectedRepoNames.includes(repo.full_name)) {
-                            orgSecrets.push(orgSecret);
-                        }
-                    }
-                }
-                const orgSecretNames = orgSecrets.map(it => it.name);
-                allSecrets.push(...orgSecretNames);
-                if (orgSecretNames.length) {
-                    core.info(`Organisation secrets for this repository:\n  ${orgSecretNames.join('\n  ')}`);
-                }
-                else {
-                    core.info(`No organisation secrets set for this repository`);
-                }
-            });
-        }
-        await core.group('Getting repository secrets', async () => {
-            const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
-            }).then(it => it.secrets != null ? it.secrets : it);
-            const repoSecretNames = repoSecrets.map(it => it.name);
-            allSecrets.push(...repoSecretNames);
-            if (repoSecretNames.length) {
-                core.info(`Repository secrets:\n  ${repoSecretNames.join('\n  ')}`);
-            }
-            else {
-                core.info(`No repository secrets set`);
-            }
-        });
-        const workflowsDir = '.github/workflows';
-        const workflowFiles = await octokit.repos.getContent({
-            owner: github_1.context.repo.owner,
-            repo: github_1.context.repo.repo,
-            path: workflowsDir,
-            ref,
-        }).then(it => it.data);
-        if (!Array.isArray(workflowFiles)) {
-            return;
-        }
-        let haveUnknownSecrets = false;
-        for (const workflowFile of workflowFiles) {
-            if (workflowFile.type !== 'file')
-                continue;
-            if (!workflowFile.name.endsWith('.yml'))
-                continue;
-            await core.group(`Processing ${workflowFile.url}`, async () => {
-                const workflowFilePath = `${workflowsDir}/${workflowFile.name}`;
-                const contentInfo = await octokit.repos.getContent({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    path: workflowFilePath,
-                    ref,
-                }).then(it => it.data);
-                const content = contentInfo.encoding?.toLowerCase() === 'base64'
-                    ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
-                    : contentInfo.content;
-                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g);
-                for (const substitutionMatch of substitutionMatches) {
-                    const secretMatches = substitutionMatch[1].matchAll(/\b(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g);
-                    for (const secretMatch of secretMatches) {
-                        const secretName = secretMatch[2];
-                        const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0);
-                        const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/);
-                        const line = lines.length;
-                        const column = lines[lines.length - 1].length;
-                        if (!allSecrets.includes(secretName)) {
-                            const isOptional = optionalSecrets.includes(secretName)
-                                || !!secretMatch[1]
-                                || !!secretMatch[3];
-                            if (isOptional) {
-                                core.info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`);
-                            }
-                            else {
-                                haveUnknownSecrets = true;
-                                core.error(`Not configured secret: ${secretName}`, {
-                                    file: workflowFilePath,
-                                    startLine: line,
-                                    startColumn: column,
-                                });
-                            }
-                        }
-                        else {
-                            core.info(`Configured secret: ${secretName} (pos: ${line}:${column})`);
-                        }
-                    }
-                }
-            });
-        }
-        if (haveUnknownSecrets) {
-            throw new Error('Workflow files with unknown secrets found');
-        }
-        let haveForbiddenSecrets = false;
-        for (const forbiddenSecret of forbiddenSecrets) {
-            if (allSecrets.includes(forbiddenSecret)) {
-                core.error(`Forbidden secret: ${forbiddenSecret}`);
-                haveForbiddenSecrets = true;
-            }
-        }
-        if (haveForbiddenSecrets) {
-            throw new Error('Repository (or organisation) has forbidden secrets defined');
-        }
-    }
-    catch (error) {
-        core.setFailed(error instanceof Error ? error : error.toString());
-        throw error;
-    }
-}
-run();
-
-
-/***/ }),
-
 /***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -33459,17 +33187,250 @@ module.exports = require("zlib");
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(9538);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(5438);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/utils.js
+var utils = __nccwpck_require__(3030);
+// EXTERNAL MODULE: ./node_modules/@octokit/plugin-request-log/dist-node/index.js
+var dist_node = __nccwpck_require__(8883);
+// EXTERNAL MODULE: ./node_modules/@octokit/plugin-retry/dist-node/index.js
+var plugin_retry_dist_node = __nccwpck_require__(6298);
+// EXTERNAL MODULE: ./node_modules/@octokit/plugin-throttling/dist-node/index.js
+var plugin_throttling_dist_node = __nccwpck_require__(9968);
+;// CONCATENATED MODULE: ./build/internal/octokit.js
+
+
+
+
+
+const OctokitWithPlugins = utils.GitHub.plugin(plugin_retry_dist_node.retry)
+    .plugin(plugin_throttling_dist_node.throttling)
+    .plugin(dist_node.requestLog)
+    .defaults({
+    previews: [
+        'baptiste',
+        'mercy',
+    ],
+});
+function newOctokitInstance(token) {
+    const baseOptions = (0,utils.getOctokitOptions)(token);
+    const throttleOptions = {
+        throttle: {
+            onRateLimit: (retryAfter, options) => {
+                const retryCount = options.request.retryCount;
+                const retryLogInfo = retryCount === 0 ? '' : ` (retry #${retryCount})`;
+                core.debug(`Request quota exhausted for request ${options.method} ${options.url}${retryLogInfo}`);
+                return retryCount <= 4;
+            },
+            onSecondaryRateLimit: (retryAfter, options) => {
+                core.error(`Abuse detected for request ${options.method} ${options.url}`);
+                return false;
+            },
+        },
+    };
+    const retryOptions = {
+        retry: {
+            doNotRetry: ['429'],
+        },
+    };
+    const logOptions = {};
+    const traceLogging = __nccwpck_require__(385)({ level: 'trace' });
+    if (core.isDebug()) {
+        logOptions.log = traceLogging;
+    }
+    const allOptions = {
+        ...baseOptions,
+        ...throttleOptions,
+        ...retryOptions,
+        ...logOptions,
+    };
+    const octokit = new OctokitWithPlugins(allOptions);
+    const client = {
+        ...octokit.rest,
+        paginate: octokit.paginate,
+    };
+    return client;
+}
+
+;// CONCATENATED MODULE: ./build/main.js
+
+
+
+const githubToken = core.getInput('githubToken', { required: true });
+const ref = core.getInput('ref', { required: false });
+const optionalSecrets = core.getInput('optionalSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length);
+const forbiddenSecrets = core.getInput('forbiddenSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length);
+const octokit = newOctokitInstance(githubToken);
+async function run() {
+    try {
+        const repo = await octokit.repos.get({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+        }).then(it => it.data);
+        const isInOrg = repo.owner?.type?.toLowerCase() === 'organization';
+        const allSecrets = [];
+        if (isInOrg) {
+            await core.group('Getting organisation secrets', async () => {
+                const allOrgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
+                    org: github.context.repo.owner,
+                }).then(it => it.secrets != null ? it.secrets : it);
+                const orgSecrets = [];
+                for (const orgSecret of allOrgSecrets) {
+                    if (orgSecret.visibility == null || orgSecret.visibility.toLowerCase() === 'all') {
+                        orgSecrets.push(orgSecret);
+                    }
+                    else if (orgSecret.visibility.toLowerCase() === 'private') {
+                        if (repo.visibility === 'private') {
+                            orgSecrets.push(orgSecret);
+                        }
+                    }
+                    else if (orgSecret.visibility.toLowerCase() === 'selected') {
+                        const selectedRepoNames = await octokit.actions.listSelectedReposForOrgSecret({
+                            org: github.context.repo.owner,
+                            secret_name: orgSecret.name,
+                        }).then(it => it.data.repositories.map(that => that.full_name));
+                        if (selectedRepoNames.includes(repo.full_name)) {
+                            orgSecrets.push(orgSecret);
+                        }
+                    }
+                }
+                const orgSecretNames = orgSecrets.map(it => it.name);
+                allSecrets.push(...orgSecretNames);
+                if (orgSecretNames.length) {
+                    core.info(`Organisation secrets for this repository:\n  ${orgSecretNames.join('\n  ')}`);
+                }
+                else {
+                    core.info(`No organisation secrets set for this repository`);
+                }
+            });
+        }
+        await core.group('Getting repository secrets', async () => {
+            const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+            }).then(it => it.secrets != null ? it.secrets : it);
+            const repoSecretNames = repoSecrets.map(it => it.name);
+            allSecrets.push(...repoSecretNames);
+            if (repoSecretNames.length) {
+                core.info(`Repository secrets:\n  ${repoSecretNames.join('\n  ')}`);
+            }
+            else {
+                core.info(`No repository secrets set`);
+            }
+        });
+        const workflowsDir = '.github/workflows';
+        const workflowFiles = await octokit.repos.getContent({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            path: workflowsDir,
+            ref,
+        }).then(it => it.data);
+        if (!Array.isArray(workflowFiles)) {
+            return;
+        }
+        let haveUnknownSecrets = false;
+        for (const workflowFile of workflowFiles) {
+            if (workflowFile.type !== 'file')
+                continue;
+            if (!workflowFile.name.endsWith('.yml'))
+                continue;
+            await core.group(`Processing ${workflowFile.url}`, async () => {
+                const workflowFilePath = `${workflowsDir}/${workflowFile.name}`;
+                const contentInfo = await octokit.repos.getContent({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    path: workflowFilePath,
+                    ref,
+                }).then(it => it.data);
+                const content = contentInfo.encoding?.toLowerCase() === 'base64'
+                    ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
+                    : contentInfo.content;
+                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g);
+                for (const substitutionMatch of substitutionMatches) {
+                    const secretMatches = substitutionMatch[1].matchAll(/\b(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g);
+                    for (const secretMatch of secretMatches) {
+                        const secretName = secretMatch[2];
+                        const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0);
+                        const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/);
+                        const line = lines.length;
+                        const column = lines[lines.length - 1].length;
+                        if (!allSecrets.includes(secretName)) {
+                            const isOptional = optionalSecrets.includes(secretName)
+                                || !!secretMatch[1]
+                                || !!secretMatch[3];
+                            if (isOptional) {
+                                core.info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`);
+                            }
+                            else {
+                                haveUnknownSecrets = true;
+                                core.error(`Not configured secret: ${secretName}`, {
+                                    file: workflowFilePath,
+                                    startLine: line,
+                                    startColumn: column,
+                                });
+                            }
+                        }
+                        else {
+                            core.info(`Configured secret: ${secretName} (pos: ${line}:${column})`);
+                        }
+                    }
+                }
+            });
+        }
+        if (haveUnknownSecrets) {
+            throw new Error('Workflow files with unknown secrets found');
+        }
+        let haveForbiddenSecrets = false;
+        for (const forbiddenSecret of forbiddenSecrets) {
+            if (allSecrets.includes(forbiddenSecret)) {
+                core.error(`Forbidden secret: ${forbiddenSecret}`);
+                haveForbiddenSecrets = true;
+            }
+        }
+        if (haveForbiddenSecrets) {
+            throw new Error('Repository (or organisation) has forbidden secrets defined');
+        }
+    }
+    catch (error) {
+        core.setFailed(error instanceof Error ? error : error.toString());
+        throw error;
+    }
+}
+run();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
