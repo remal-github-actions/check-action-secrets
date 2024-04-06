@@ -24,6 +24,9 @@ jobs:
     name: Check rate limits
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    concurrency:
+      group: codeowners-validation
+      cancel-in-progress: true
     steps:
     - name: Get rate limits
       uses: remal-github-actions/get-rate-limits@v1
@@ -34,11 +37,14 @@ jobs:
       id: decision
       run: |
         echo "Core rate limit usage: ${{steps.getRateLimits.outputs.coreUsage}}"
-        if [ "${{steps.getRateLimits.outputs.coreUsage < 50}}" == "true" ]; then
+        if [ "${{steps.getRateLimits.outputs.coreUsage < 75}}" == "true" ]; then
           echo "Enough rate limits"
           echo 'enough=true' >> $GITHUB_OUTPUT
         else
           echo "::warning::Not enough rate limits!"
+          if [ "${{github.event_name != 'schedule'}}" == "true" ]; then
+            echo "::warning::Executing anyway, as event is '${{github.event_name}}'"
+          fi
           echo 'enough=false' >> $GITHUB_OUTPUT
         fi
     outputs:
@@ -50,6 +56,9 @@ jobs:
     if: ${{github.event_name != 'schedule' || fromJSON(needs.rate-limits.outputs.enough) == true}}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: codeowners-validation
+      cancel-in-progress: true
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
