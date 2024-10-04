@@ -3,13 +3,13 @@
   "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "alwaysStrict": true,
+    "esModuleInterop": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noImplicitAny": false,
+    "removeComments": true,
     "strict": true,
     "strictNullChecks": true,
-    "noImplicitAny": false,
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "removeComments": true,
     "types": [
       "node"
     ]

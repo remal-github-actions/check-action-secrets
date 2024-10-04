@@ -6,10 +6,10 @@
     "node": ">=20"
   },
   "packageManager": "yarn@4.5.0",
-  "main": "dist/main.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint --fix src/**/*",
-    "test": "jest --passWithNoTests",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --passWithNoTests",
     "tsconfig-generate-app": "node tsconfig-generate-app",
     "compile": "npm run lint && rimraf --glob build && node tsconfig-generate-app && tsc -project tsconfig.app.json --rootDir src --outDir build",
     "dist": "npm run compile && rimraf --glob dist && ncc build build/main.js --out dist",
@@ -18,12 +18,12 @@
   "dependencies": {
     "@actions/core": "1.11.0",
     "@actions/github": "6.0.0",
-    "@octokit/plugin-request-log": "5.1.0",
-    "@octokit/plugin-retry": "7.1.0",
-    "@octokit/plugin-throttling": "8.2.0",
-    "console-log-level": "1.4.1"
+    "@octokit/rest": "21.0.2",
+    "console-log-level": "1.4.1",
+    "octokit": "4.0.2"
   },
   "devDependencies": {
+    "@octokit/openapi-types": "22.2.0",
     "@tsconfig/node20": "20.1.4",
     "@types/console-log-level": "1.4.5",
     "@types/jest": "29.5.13",
@@ -32,12 +32,14 @@
     "@vercel/ncc": "0.38.2",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
+    "eslint-import-resolver-typescript": "3.6.3",
     "eslint-plugin-github": "5.0.2",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jest": "28.8.3",
     "eslint-plugin-prettier": "5.2.1",
     "jest": "29.7.0",
     "jest-circus": "29.7.0",
+    "jest-extended": "4.0.2",
     "rimraf": "6.0.1",
     "semver": "^7",
     "ts-jest": "29.2.5",

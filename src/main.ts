@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { context } from '@actions/github'
-import { newOctokitInstance } from './internal/octokit'
-import { DirectoryContent, FileContent, OrgSecret, Repo, RepoSecret } from './internal/types'
+import { newOctokitInstance } from './internal/octokit.js'
+import { DirectoryContent, FileContent, OrgSecret, Repo } from './internal/types.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,7 +34,7 @@ async function run(): Promise<void> {
             await core.group('Getting organisation secrets', async () => {
                 const allOrgSecrets: OrgSecret[] = await octokit.paginate(octokit.actions.listOrgSecrets, {
                     org: context.repo.owner,
-                }).then(it => it.secrets != null ? it.secrets : it as OrgSecret[])
+                })
                 const orgSecrets: OrgSecret[] = []
                 for (const orgSecret of allOrgSecrets) {
                     if (orgSecret.visibility == null || orgSecret.visibility.toLowerCase() === 'all') {
@@ -67,7 +67,7 @@ async function run(): Promise<void> {
             const repoSecrets = await octokit.paginate(octokit.actions.listRepoSecrets, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-            }).then(it => it.secrets != null ? it.secrets : it as RepoSecret[])
+            })
             const repoSecretNames = repoSecrets.map(it => it.name)
             allSecrets.push(...repoSecretNames)
             if (repoSecretNames.length) {
@@ -146,7 +146,7 @@ async function run(): Promise<void> {
                 }
             })
         }
-        
+
         if (haveUnknownSecrets) {
             throw new Error('Workflow files with unknown secrets found')
         }
@@ -163,7 +163,7 @@ async function run(): Promise<void> {
         }
 
     } catch (error) {
-        core.setFailed(error instanceof Error ? error : (error as object).toString())
+        core.setFailed(error instanceof Error ? error : `${error}`)
         throw error
     }
 }
