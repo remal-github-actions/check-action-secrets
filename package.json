@@ -16,7 +16,7 @@
     "build": "npm run dist && npm run test"
   },
   "dependencies": {
-    "@actions/core": "1.11.0",
+    "@actions/core": "1.11.1",
     "@actions/github": "6.0.0",
     "@octokit/rest": "21.0.2",
     "console-log-level": "1.4.1",
