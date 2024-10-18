@@ -37821,6 +37821,10 @@ const forbiddenSecrets = core.getInput('forbiddenSecrets', { required: false })
     .split(/[,;\n\r]/)
     .map(it => it.trim())
     .filter(it => it.length);
+const predefinedSecrets = core.getInput('predefinedSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length);
 const octokit = newOctokitInstance(githubToken);
 async function run() {
     try {
@@ -37829,7 +37833,9 @@ async function run() {
             repo: github.context.repo.repo,
         }).then(it => it.data);
         const isInOrg = repo.owner?.type?.toLowerCase() === 'organization';
-        const allSecrets = [];
+        const allSecrets = [
+            ...predefinedSecrets,
+        ];
         if (isInOrg) {
             await core.group('Getting organisation secrets', async () => {
                 const allOrgSecrets = await octokit.paginate(octokit.actions.listOrgSecrets, {
