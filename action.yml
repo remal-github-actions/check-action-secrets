@@ -16,6 +16,10 @@ inputs:
   forbiddenSecrets:
     required: false
     description: A list of forbidden secrets
+  predefinedSecrets:
+    required: false
+    default: 'GITHUB_TOKEN'
+    description: A list of predefined secrets
 
 runs:
   using: node20

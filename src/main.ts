@@ -15,6 +15,10 @@ const forbiddenSecrets = core.getInput('forbiddenSecrets', { required: false })
     .split(/[,;\n\r]/)
     .map(it => it.trim())
     .filter(it => it.length)
+const predefinedSecrets = core.getInput('predefinedSecrets', { required: false })
+    .split(/[,;\n\r]/)
+    .map(it => it.trim())
+    .filter(it => it.length)
 
 const octokit = newOctokitInstance(githubToken)
 
@@ -28,7 +32,9 @@ async function run(): Promise<void> {
         const isInOrg = repo.owner?.type?.toLowerCase() === 'organization'
 
 
-        const allSecrets: string[] = []
+        const allSecrets: string[] = [
+            ...predefinedSecrets,
+        ]
 
         if (isInOrg) {
             await core.group('Getting organisation secrets', async () => {
