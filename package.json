@@ -29,7 +29,7 @@
     "@types/jest": "29.5.14",
     "@types/node": "20.17.6",
     "@types/semver": "^7",
-    "@vercel/ncc": "0.38.2",
+    "@vercel/ncc": "0.38.3",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-import-resolver-typescript": "3.6.3",
