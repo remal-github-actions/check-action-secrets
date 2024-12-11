@@ -4,11 +4,11 @@ description: Check that all secrets used in GitHub action are defined for the re
 inputs:
   githubToken:
     required: true
-    default: '${{github.token}}'
+    default: ${{github.token}}
     description: GitHub access token
   ref:
     required: false
-    default: '${{github.ref}}'
+    default: ${{github.ref}}
     description: Git ref
   optionalSecrets:
     required: false
@@ -18,9 +18,10 @@ inputs:
     description: A list of forbidden secrets
   predefinedSecrets:
     required: false
-    default: 'GITHUB_TOKEN'
+    default: |
+      GITHUB_TOKEN
     description: A list of predefined secrets
 
 runs:
   using: node20
-  main: 'dist/index.js'
+  main: dist/index.js
