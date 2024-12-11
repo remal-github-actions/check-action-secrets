@@ -3,7 +3,7 @@ description: Check that all secrets used in GitHub action are defined for the re
 
 inputs:
   githubToken:
-    required: false
+    required: true
     default: ${{github.token}}
     description: GitHub access token
   ref:
