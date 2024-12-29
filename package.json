@@ -20,7 +20,7 @@
     "@actions/github": "6.0.0",
     "@octokit/rest": "21.0.2",
     "console-log-level": "1.4.1",
-    "octokit": "4.0.2"
+    "octokit": "4.0.3"
   },
   "devDependencies": {
     "@octokit/openapi-types": "22.2.0",
