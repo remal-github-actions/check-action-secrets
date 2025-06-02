@@ -1705,12 +1705,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.17.56":
-  version: 20.17.56
-  resolution: "@types/node@npm:20.17.56"
+"@types/node@npm:20.17.57":
+  version: 20.17.57
+  resolution: "@types/node@npm:20.17.57"
   dependencies:
     undici-types: "npm:~6.19.2"
-  checksum: 10c0/4fa887305f69852b49be35a01f1c1e64acfe341bbacae31583cf5ecc9360f561a69262f5e951b129de8d7ef146e7ce41a6f477a26cc81ce94fd02c949a311d3d
+  checksum: 10c0/c04f3b6c4f335ad50bd3af62cd9e64a86c355cb6b363cb0e618511db4c6801c8539781c3786076eca6f56e999d6c7fc4748e43393a107aad57e65e3ffd1f73bf
   languageName: node
   linkType: hard
 
@@ -3075,7 +3075,7 @@ __metadata:
     "@tsconfig/node20": "npm:20.1.5"
     "@types/console-log-level": "npm:1.4.5"
     "@types/jest": "npm:29.5.14"
-    "@types/node": "npm:20.17.56"
+    "@types/node": "npm:20.17.57"
     "@types/semver": "npm:^7"
     "@vercel/ncc": "npm:0.38.3"
     console-log-level: "npm:1.4.1"
