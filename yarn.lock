@@ -31,18 +31,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/github@npm:8.0.0":
-  version: 8.0.0
-  resolution: "@actions/github@npm:8.0.0"
+"@actions/github@npm:8.0.1":
+  version: 8.0.1
+  resolution: "@actions/github@npm:8.0.1"
   dependencies:
-    "@actions/http-client": "npm:^3.0.1"
+    "@actions/http-client": "npm:^3.0.2"
     "@octokit/core": "npm:^7.0.6"
     "@octokit/plugin-paginate-rest": "npm:^14.0.0"
     "@octokit/plugin-rest-endpoint-methods": "npm:^17.0.0"
     "@octokit/request": "npm:^10.0.7"
     "@octokit/request-error": "npm:^7.1.0"
-    undici: "npm:^5.28.5"
-  checksum: 10c0/673857bcd4e95d183f4345b69dad4af006720c6144a6ece4406757e774f3aad6c98f25ba5f6c9e398721aed5cbbc1efb3478cdf6fe4f41b70014bd08c0ab3051
+    undici: "npm:^6.23.0"
+  checksum: 10c0/d86f92f20874482907d3bca807476f7bb53f8d38e8afa9bf9bd6016b2e92af95a7b98300abbe7af1b9a0f3a76f1ad2d7e7236b1fa640578daadb1048c4d262f7
   languageName: node
   linkType: hard
 
@@ -53,6 +53,16 @@ __metadata:
     tunnel: "npm:^0.0.6"
     undici: "npm:^5.28.5"
   checksum: 10c0/01c48d6c47225168575630b693ec60bc75fb6e96b7ff244b365fa40915f0e33f656fd7bc5c5d0d96a92727715fb905cb1d4287e6f38fd1f70271fe174de5b0ce
+  languageName: node
+  linkType: hard
+
+"@actions/http-client@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@actions/http-client@npm:3.0.2"
+  dependencies:
+    tunnel: "npm:^0.0.6"
+    undici: "npm:^6.23.0"
+  checksum: 10c0/b58eedef5a76d4341edf66cba5df3acb338e420ea1ab5223c3f5d0bf7f5cfaa56d5a5578f8a0b7a9ce50ccc06a0d2bb74aad4abf8bd7b5606b032bbe0b623c92
   languageName: node
   linkType: hard
 
@@ -3325,7 +3335,7 @@ __metadata:
   resolution: "check-action-secrets@workspace:."
   dependencies:
     "@actions/core": "npm:2.0.2"
-    "@actions/github": "npm:8.0.0"
+    "@actions/github": "npm:8.0.1"
     "@octokit/openapi-types": "npm:27.0.0"
     "@octokit/plugin-retry": "npm:8.0.3"
     "@octokit/plugin-throttling": "npm:11.0.3"
@@ -9258,6 +9268,13 @@ __metadata:
   dependencies:
     "@fastify/busboy": "npm:^2.0.0"
   checksum: 10c0/e4e4d631ca54ee0ad82d2e90e7798fa00a106e27e6c880687e445cc2f13b4bc87c5eba2a88c266c3eecffb18f26e227b778412da74a23acc374fca7caccec49b
+  languageName: node
+  linkType: hard
+
+"undici@npm:^6.23.0":
+  version: 6.23.0
+  resolution: "undici@npm:6.23.0"
+  checksum: 10c0/d846b3fdfd05aa6081ba1eab5db6bbc21b283042c7a43722b86d1ee2bf749d7c990ceac0c809f9a07ffd88b1b0f4c0f548a8362c035088cb1997d63abdda499c
   languageName: node
   linkType: hard
 
