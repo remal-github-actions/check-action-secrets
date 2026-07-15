@@ -6801,14 +6801,14 @@ __metadata:
 
 "resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>":
   version: 1.22.7
-  resolution: "resolve@patch:resolve@npm%3A1.22.7#optional!builtin<compat/resolve>::version=1.22.7&hash=c3c19d"
+  resolution: "resolve@patch:resolve@npm%3A1.22.7#optional!builtin<compat/resolve>::version=1.22.7&hash=9bd1a5"
   dependencies:
     is-core-module: "npm:^2.13.0"
     path-parse: "npm:^1.0.7"
     supports-preserve-symlinks-flag: "npm:^1.0.0"
   bin:
     resolve: bin/resolve
-  checksum: 10c0/f37c121c20468f2725ee5759c65fd96a72d0bb18695026352b27273768b601ce26894c0428acbd6182a9080829e30cb108d33ad4227f80c484b00fa6d4d0f25b
+  checksum: 10c0/92f6c09c83f877465d70ea2b2b1cfd799edffa62e57ff8bba8e1aa1b55d990b0f10d5da341ffba2addbe0a34064c965d38e0aa268fca2b255b364c743ddbb986
   languageName: node
   linkType: hard
 
