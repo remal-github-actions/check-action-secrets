@@ -38158,7 +38158,28 @@ function newOctokitInstance(token) {
     return client;
 }
 
+;// CONCATENATED MODULE: ./build/internal/secretReferences.js
+function findSecretReferences(content) {
+    const references = [];
+    const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g);
+    for (const substitutionMatch of substitutionMatches) {
+        const secretMatches = substitutionMatch[1].matchAll(/(?<![\w.-])(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g);
+        for (const secretMatch of secretMatches) {
+            const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0);
+            const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/);
+            references.push({
+                name: secretMatch[2],
+                line: lines.length,
+                column: lines[lines.length - 1].length,
+                isConditional: !!secretMatch[1] || !!secretMatch[3],
+            });
+        }
+    }
+    return references;
+}
+
 ;// CONCATENATED MODULE: ./build/main.js
+
 
 
 
@@ -38263,34 +38284,28 @@ async function run() {
                 const content = contentInfo.encoding?.toLowerCase() === 'base64'
                     ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
                     : contentInfo.content;
-                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g);
-                for (const substitutionMatch of substitutionMatches) {
-                    const secretMatches = substitutionMatch[1].matchAll(/\b(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g);
-                    for (const secretMatch of secretMatches) {
-                        const secretName = secretMatch[2];
-                        const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0);
-                        const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/);
-                        const line = lines.length;
-                        const column = lines[lines.length - 1].length;
-                        if (!allSecrets.includes(secretName)) {
-                            const isOptional = optionalSecrets.includes(secretName)
-                                || !!secretMatch[1]
-                                || !!secretMatch[3];
-                            if (isOptional) {
-                                info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`);
-                            }
-                            else {
-                                haveUnknownSecrets = true;
-                                error(`Not configured secret: ${secretName}`, {
-                                    file: workflowFilePath,
-                                    startLine: line,
-                                    startColumn: column,
-                                });
-                            }
+                const secretReferences = findSecretReferences(content);
+                for (const secretReference of secretReferences) {
+                    const secretName = secretReference.name;
+                    const line = secretReference.line;
+                    const column = secretReference.column;
+                    if (!allSecrets.includes(secretName)) {
+                        const isOptional = optionalSecrets.includes(secretName)
+                            || secretReference.isConditional;
+                        if (isOptional) {
+                            info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`);
                         }
                         else {
-                            info(`Configured secret: ${secretName} (pos: ${line}:${column})`);
+                            haveUnknownSecrets = true;
+                            error(`Not configured secret: ${secretName}`, {
+                                file: workflowFilePath,
+                                startLine: line,
+                                startColumn: column,
+                            });
                         }
+                    }
+                    else {
+                        info(`Configured secret: ${secretName} (pos: ${line}:${column})`);
                     }
                 }
             });
