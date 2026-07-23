@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import { context } from '@actions/github'
 import { newOctokitInstance } from './internal/octokit.js'
+import { findSecretReferences } from './internal/secretReferences.js'
 import { DirectoryContent, FileContent, OrgSecret, Repo } from './internal/types.js'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -111,43 +112,37 @@ async function run(): Promise<void> {
                     ? Buffer.from(contentInfo.content, 'base64').toString('utf8')
                     : contentInfo.content
 
-                const substitutionMatches = content.matchAll(/\$\{\{([\s\S]+?)}}/g)
-                for (const substitutionMatch of substitutionMatches) {
-                    const secretMatches = substitutionMatch[1].matchAll(/\b(!+)?secrets\.([\w-]+)(\s*(?:&&|\|\|))?/g)
-                    for (const secretMatch of secretMatches) {
-                        const secretName = secretMatch[2]
-                        const pos = (substitutionMatch.index || 0) + (secretMatch.index || 0)
-                        const lines = content.substring(0, pos).split(/\r\n|\n\r|\n|\r/)
-                        const line = lines.length
-                        const column = lines[lines.length - 1].length
+                const secretReferences = findSecretReferences(content)
+                for (const secretReference of secretReferences) {
+                    const secretName = secretReference.name
+                    const line = secretReference.line
+                    const column = secretReference.column
 
-                        if (!allSecrets.includes(secretName)) {
-                            const isOptional = optionalSecrets.includes(secretName)
-                                || !!secretMatch[1]
-                                || !!secretMatch[3]
-                            if (isOptional) {
-                                core.info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`/*, {
-                                    file: workflowFilePath,
-                                    startLine: line,
-                                    startColumn: column,
-                                }*/)
-
-                            } else {
-                                haveUnknownSecrets = true
-                                core.error(`Not configured secret: ${secretName}`, {
-                                    file: workflowFilePath,
-                                    startLine: line,
-                                    startColumn: column,
-                                })
-                            }
-
-                        } else {
-                            core.info(`Configured secret: ${secretName} (pos: ${line}:${column})`/*, {
+                    if (!allSecrets.includes(secretName)) {
+                        const isOptional = optionalSecrets.includes(secretName)
+                            || secretReference.isConditional
+                        if (isOptional) {
+                            core.info(`Not configured optional secret: ${secretName} (pos: ${line}:${column})`/*, {
                                 file: workflowFilePath,
                                 startLine: line,
                                 startColumn: column,
                             }*/)
+
+                        } else {
+                            haveUnknownSecrets = true
+                            core.error(`Not configured secret: ${secretName}`, {
+                                file: workflowFilePath,
+                                startLine: line,
+                                startColumn: column,
+                            })
                         }
+
+                    } else {
+                        core.info(`Configured secret: ${secretName} (pos: ${line}:${column})`/*, {
+                            file: workflowFilePath,
+                            startLine: line,
+                            startColumn: column,
+                        }*/)
                     }
                 }
             })
